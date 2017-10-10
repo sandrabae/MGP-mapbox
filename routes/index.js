@@ -162,7 +162,7 @@ function magnitude(point){
 
 
 router.post('/ajax', function(req, res) {
-    var result = require('../public/javascripts/test2'), //54k rows
+    var result = require('../public/data/test2'), //54k rows
      body = req.body,
      start = body["start"],
      end = body["end"],
