@@ -9,37 +9,36 @@ router.get('/', function(req, res, next) {
 
 function aggregateLocation(data){
     var features = []
-    var location = {};
+    var locations = []
 
-    data.forEach(function(d){
-        var longAndLatArray = d["geometry"]["coordinates"].toString();
-        if(longAndLatArray in location){
-            var date = d["properties"]["date"];
-            var dateArray = location[longAndLatArray]["Date"];
-            if(dateArray.indexOf(date) < 0){location[longAndLatArray]["Date"].push(date);}
-            location[longAndLatArray]["Samples"] = location[longAndLatArray]["Samples"] + 1;
-        }else{
-            var date = d["properties"]["date"];
-            location[longAndLatArray] = { Date:[date], Samples: 1};
-        }
-        
+    data.forEach(function(obj){
+        var location = {};
+        obj["features"].forEach(function(d){ 
+            var longAndLatArray = d["geometry"]["coordinates"].toString();
+            if(longAndLatArray in location){
+                var date = d["properties"]["date"];
+                var dateArray = location[longAndLatArray]["Date"];
+                if(dateArray.indexOf(date) < 0){location[longAndLatArray]["Date"].push(date);}
+                location[longAndLatArray]["Samples"] = location[longAndLatArray]["Samples"] + 1;
+            }else{
+                var date = d["properties"]["date"];
+                location[longAndLatArray] = { Date:[date], Samples: 1};
+            }
+        });
+        locations.push(location);
     });
 
-    
-    var top5Species = ["PSEUDOCALANUS MINUTUS","ZOOPLANKTON","OITHONA SIMILIS","METRIDIA LONGA","TEMORA LONGICORNIS"];
-    var markers = [];
-    top5Species.forEach(function(species){
-        markers.push(createMarkers(data,species));
-    })
 
-    var polygons = createPolygons(location);
+    var polygons = [];
+    locations.forEach(function(location){
+        var polygon = createPolygons(location);
+        polygons.push(polygon);
+    });
 
-    polygons.forEach(function(d){ features.push(d);});
-
-    return [features, markers];
+    return [polygons];
 }
 
-function createMarkers(data, species_name){
+function createMarkers(data){
     var solution = [];
 
     var location = {};
@@ -47,7 +46,7 @@ function createMarkers(data, species_name){
     data.forEach(function(d){
         var longAndLatArray = d["geometry"]["coordinates"].toString();
 
-        if(d["properties"]["ITIS TSN"] == species_name && !(longAndLatArray in location)){
+        if(!(longAndLatArray in location)){
             location[longAndLatArray] = longAndLatArray;
             solution.push(d);
         }
@@ -57,45 +56,27 @@ function createMarkers(data, species_name){
 }
 
 
-//This grouping is whack AF use  the grouping from R
 function createPolygons(data){
-    var US = [];
-    var US_Data = [];
-    var Greenland = [];
-    var GreenData = [];
     var polygons = [];
 
     //TODO: method for grouping a set coordinates to be then turned into polygons
-    for(var key in data){
+    var coords = []
+    for(key in data){
         var stringCoordinates = key.split(',');
         var coordinates = [0,0];
         coordinates[0] = parseFloat(stringCoordinates[0]);
         coordinates[1] = parseFloat(stringCoordinates[1]);
-
-        if(coordinates[0] > -156  && coordinates[0] < -70){
-            //United states related check if between -156 && -70
-            US.push(coordinates);
-            US_Data.push(data[key]);
-        }else{
-            //Greenland check if between -6 && 39
-            Greenland.push(coordinates);
-            GreenData.push(data[key]);
-        }
+        coords.push(coordinates);
     }
+    
 
-    var USPoly = JarvisMarch(US);
-    var GreenlandPoly =  JarvisMarch(Greenland);
+    var poly = JarvisMarch(coords);
 
-    console.log(US.length);
+    console.log(poly);
 
-    var polys = [USPoly, GreenlandPoly];
-    var names = ["America W", "Greenland"];
-    polys.forEach(function(poly, i){
-        var object = { type: "Feature", geometry:{"coordinates": [poly], type: "Polygon"}, properties: {name: names[i]}};
-        polygons.push(object);
-    });
+    var object = { type: "Feature", geometry:{"coordinates": [poly], type: "Polygon"}};
 
-    return polygons;
+    return object;
 }
 
 function JarvisMarch(data){
@@ -173,16 +154,16 @@ function magnitude(point){
 
 
 router.post('/ajax', function(req, res) {
-    var result = require('../public/data/test2'), //54k rows
+    var result = require('../public/data/Spatial'), 
+     markerData = require('../public/data/fish-geo'),
      body = req.body,
      start = body["start"],
-     end = body["end"],
-     features = result["features"];
-    console.log(features.length); 
+     end = body["end"];
 
     // var featuresSlice = features.slice(start,end);
-    var slimmedSlice = aggregateLocation(features);
+    var slimmedSlice = aggregateLocation(result);
 
+    slimmedSlice.push(result[2]);
     var geoCollection = [];
     slimmedSlice.forEach(function(d){
         var geoJSON = {"type": "FeatureCollection", "features": d}

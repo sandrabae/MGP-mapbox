@@ -64,7 +64,7 @@ loadingMap = function(data) {
 
     // // This is where your interactions with the symbol layer used to be
     // // Now you have interactions with DOM markers instead
-    data[1].features[1].forEach(function(marker, i) {
+    data[1].features.features.forEach(function(marker, i) {
         // Create an img element for the marker
         var el = document.createElement('div');
         el.id = "marker-" + i;
