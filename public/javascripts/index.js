@@ -1,4 +1,4 @@
-loadingMap = function(stores) {
+loadingMap = function(data) {
     if (!('remove' in Element.prototype)) {
         Element.prototype.remove = function() {
             if (this.parentNode) {
@@ -22,14 +22,16 @@ loadingMap = function(stores) {
         scrollZoom: true
     });
 
-	console.log(stores);
+	console.log(data);
+
+    //Two kinds of sources, polygonal & markers
 
     // This adds the data to the map
     map.on('load', function(e) {
         // This is where your '.addLayer()' used to be, instead add only the source without styling a layer
         map.addSource("places", {
             "type": "geojson",
-            "data": stores
+            "data": data[0]
         });
 
         map.addLayer({
@@ -62,59 +64,59 @@ loadingMap = function(stores) {
 
     // // This is where your interactions with the symbol layer used to be
     // // Now you have interactions with DOM markers instead
-    // stores.features.forEach(function(marker, i) {
-    //     // Create an img element for the marker
-    //     var el = document.createElement('div');
-    //     el.id = "marker-" + i;
-    //     el.className = 'marker';
-    //     // Add markers to the map at all points
-    //     new mapboxgl.Marker(el, {
-    //             offset: [-28, -46]
-    //         })
-    //         .setLngLat(marker.geometry.coordinates)
-    //         .addTo(map);
+    data[1].features[1].forEach(function(marker, i) {
+        // Create an img element for the marker
+        var el = document.createElement('div');
+        el.id = "marker-" + i;
+        el.className = 'marker';
+        // Add markers to the map at all points
+        new mapboxgl.Marker(el, {
+                offset: [-28, -46]
+            })
+            .setLngLat(marker.geometry.coordinates)
+            .addTo(map);
 
-    //     el.addEventListener('click', function(e) {
-    //         // 1. Fly to the point
-    //         flyToStore(marker);
+        el.addEventListener('click', function(e) {
+            // 1. Fly to the point
+            flyToStore(marker);
 
-    //         // 2. Close all other popups and display popup for clicked store
-    //         createPopUp(marker);
+            // 2. Close all other popups and display popup for clicked store
+            createPopUp(marker);
 
-    //         // 3. Highlight listing in sidebar (and remove highlight for all other listings)
-    //         var activeItem = document.getElementsByClassName('active');
+            // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+            var activeItem = document.getElementsByClassName('active');
 
-    //         e.stopPropagation();
-    //         if (activeItem[0]) {
-    //             activeItem[0].classList.remove('active');
-    //         }
+            e.stopPropagation();
+            if (activeItem[0]) {
+                activeItem[0].classList.remove('active');
+            }
 
-    //         var listing = document.getElementById('listing-' + i);
-    //         listing.classList.add('active');
+            var listing = document.getElementById('listing-' + i);
+            listing.classList.add('active');
 
-    //     });
-    // });
+        });
+    });
 
-    // function flyToStore(currentFeature) {
-    //     map.flyTo({
-    //         center: currentFeature.geometry.coordinates,
-    //         zoom: 15
-    //     });
-    // }
+    function flyToStore(currentFeature) {
+        map.flyTo({
+            center: currentFeature.geometry.coordinates,
+            zoom: 15
+        });
+    }
 
-    // function createPopUp(currentFeature) {
-    //     var popUps = document.getElementsByClassName('mapboxgl-popup');
-    //     if (popUps[0]) popUps[0].remove();
+    function createPopUp(currentFeature) {
+        var popUps = document.getElementsByClassName('mapboxgl-popup');
+        if (popUps[0]) popUps[0].remove();
 
 
-    //     var popup = new mapboxgl.Popup({
-    //             closeOnClick: false
-    //         })
-    //         .setLngLat(currentFeature.geometry.coordinates)
-    //         .setHTML('<h3>Cast</h3>' +
-    //             '<h4> # Samples: ' + currentFeature.properties.Samples + '</br>' + currentFeature.geometry.coordinates.toString() + '</h4>')
-    //         .addTo(map);
-    // }
+        var popup = new mapboxgl.Popup({
+                closeOnClick: false
+            })
+            .setLngLat(currentFeature.geometry.coordinates)
+            .setHTML('<h3>Cast</h3>' +
+                '<h4> # Samples: ' + currentFeature.properties.Samples + '</br>' + currentFeature.geometry.coordinates.toString() + '</h4>')
+            .addTo(map);
+    }
 
 
     // function buildLocationList(data) {

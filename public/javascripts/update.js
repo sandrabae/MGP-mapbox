@@ -10,6 +10,7 @@ function update(){
             url: '/ajax',
             success : function(response) {
                 var content = response["data"];
+                console.log(content);
                 loadingMap(content);
             }
     });

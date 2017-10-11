@@ -26,29 +26,38 @@ function aggregateLocation(data){
     });
 
     
+    var top5Species = ["PSEUDOCALANUS MINUTUS","ZOOPLANKTON","OITHONA SIMILIS","METRIDIA LONGA","TEMORA LONGICORNIS"];
+    var markers = [];
+    top5Species.forEach(function(species){
+        markers.push(createMarkers(data,species));
+    })
+
     var polygons = createPolygons(location);
 
     polygons.forEach(function(d){ features.push(d);});
 
-    return features;
+    return [features, markers];
 }
 
-function markers(data){
+function createMarkers(data, species_name){
     var solution = [];
 
-    for(var key in data){
-        var coordinates = key.split(',');
-        var object = { type: "Feature", 
-            geometry:{"coordinates": coordinates, type: "Point"}, 
-            properties: {Samples: location[key]["Samples"], Date: location[key]["Date"] }
-        };
+    var location = {};
 
-        solution.push(object);
-    }
+    data.forEach(function(d){
+        var longAndLatArray = d["geometry"]["coordinates"].toString();
+
+        if(d["properties"]["ITIS TSN"] == species_name && !(longAndLatArray in location)){
+            location[longAndLatArray] = longAndLatArray;
+            solution.push(d);
+        }
+    });
 
     return solution;
 }
 
+
+//This grouping is whack AF use  the grouping from R
 function createPolygons(data){
     var US = [];
     var US_Data = [];
@@ -76,6 +85,8 @@ function createPolygons(data){
 
     var USPoly = JarvisMarch(US);
     var GreenlandPoly =  JarvisMarch(Greenland);
+
+    console.log(US.length);
 
     var polys = [USPoly, GreenlandPoly];
     var names = ["America W", "Greenland"];
@@ -171,10 +182,15 @@ router.post('/ajax', function(req, res) {
 
     // var featuresSlice = features.slice(start,end);
     var slimmedSlice = aggregateLocation(features);
-    var geoJSON = {"type": "FeatureCollection", "features": slimmedSlice}
+
+    var geoCollection = [];
+    slimmedSlice.forEach(function(d){
+        var geoJSON = {"type": "FeatureCollection", "features": d}
+        geoCollection.push(geoJSON);
+    });
 
     if(req.xhr || req.accepts('json,html')==='json'){
-        res.json({success: true , data :geoJSON });
+        res.json({success: true , data :geoCollection });
     } else {
         res.redirect(303, '/ajax');
     }
