@@ -1,27 +1,33 @@
 var express = require('express');
 var router = express.Router();
 var compute = require('../server/computations');
+var dataRetrieval = require('../server/data-retrieval');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'yas' });
+  res.render('index');
 });
 
+/* POST 
+ * Handles the post request from the client-side to render clusters
+*/
 router.post('/ajax', function(req, res) {
-    var result = require('../public/data/Spatial'), 
-     fish = require('../public/data/fish-cluster'),
-     body = req.body,
+    var body = req.body,
      start = body["start"],
      end = body["end"];
 
-    // var featuresSlice = features.slice(start,end);
-    var slimmedSlice = compute.computeClustersPolygon(result);
-    var fishSlice = compute.computeClustersPolygon(fish);
+    var clusterToRender =  dataRetrieval.retrieveLocalData(),
+        clusters = [];
 
-    slimmedSlice.push(fish[0]);
-    slimmedSlice.push(fishSlice[0]);
+    clusterToRender.forEach(function(cluster){
+        var polygon = compute.computeClustersPolygon(cluster);
+        clusters.push(polygon);
+    });
+
+    // clusters.push(clusterToRender[1]); <-- if you want to show the markers for it
+
     var geoCollection = [];
-    slimmedSlice.forEach(function(d){
+    clusters.forEach(function(d){
         var geoJSON = {"type": "FeatureCollection", "features": d}
         geoCollection.push(geoJSON);
     });

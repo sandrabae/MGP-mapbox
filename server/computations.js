@@ -43,7 +43,7 @@ module.exports = {
             polygons.push(polygon);
         });
 
-        return [polygons];
+        return polygons;
     }  
 };
  

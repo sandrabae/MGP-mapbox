@@ -23,7 +23,7 @@ loadingMap = function(data) {
     });
 
 	console.log(data[0]);
-    console.log(data[2]);
+    console.log(data[1]);
     //Two kinds of sources, polygonal & markers
 
     // This adds the data to the map
@@ -47,7 +47,7 @@ loadingMap = function(data) {
 
         map.addSource("fish", {
             "type": "geojson",
-            "data": data[2]
+            "data": data[1]
         });
 
         map.addLayer({
