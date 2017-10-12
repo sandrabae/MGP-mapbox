@@ -22,8 +22,8 @@ loadingMap = function(data) {
         scrollZoom: true
     });
 
-	console.log(data);
-
+	console.log(data[0]);
+    console.log(data[2]);
     //Two kinds of sources, polygonal & markers
 
     // This adds the data to the map
@@ -45,6 +45,22 @@ loadingMap = function(data) {
             "filter": ["==", "$type", "Polygon"]
         });
 
+        map.addSource("fish", {
+            "type": "geojson",
+            "data": data[2]
+        });
+
+        map.addLayer({
+            "id": "fish-boundary",
+            "type": "fill",
+            "source": "fish",
+            "paint": {
+                "fill-color": "#dd7474",
+                "fill-opacity": 0.4
+            },
+            "filter": ["==", "$type", "Polygon"]
+        });  
+
         // Change the cursor to a pointer when the mouse is over the states layer.
         map.on('mouseenter', 'places-boundary', function () {
             map.getCanvas().style.cursor = 'pointer';
@@ -62,40 +78,40 @@ loadingMap = function(data) {
 
     });
 
-    // // This is where your interactions with the symbol layer used to be
-    // // Now you have interactions with DOM markers instead
-    data[1].features.features.forEach(function(marker, i) {
-        // Create an img element for the marker
-        var el = document.createElement('div');
-        el.id = "marker-" + i;
-        el.className = 'marker';
-        // Add markers to the map at all points
-        new mapboxgl.Marker(el, {
-                offset: [-28, -46]
-            })
-            .setLngLat(marker.geometry.coordinates)
-            .addTo(map);
+    // This is where your interactions with the symbol layer used to be
+    // Now you have interactions with DOM markers instead
+    // data[1].features.features.forEach(function(marker, i) {
+    //     // Create an img element for the marker
+    //     var el = document.createElement('div');
+    //     el.id = "marker-" + i;
+    //     el.className = 'marker';
+    //     // Add markers to the map at all points
+    //     new mapboxgl.Marker(el, {
+    //             offset: [-28, -46]
+    //         })
+    //         .setLngLat(marker.geometry.coordinates)
+    //         .addTo(map);
 
-        el.addEventListener('click', function(e) {
-            // 1. Fly to the point
-            flyToStore(marker);
+    //     el.addEventListener('click', function(e) {
+    //         // 1. Fly to the point
+    //         flyToStore(marker);
 
-            // 2. Close all other popups and display popup for clicked store
-            createPopUp(marker);
+    //         // 2. Close all other popups and display popup for clicked store
+    //         createPopUp(marker);
 
-            // 3. Highlight listing in sidebar (and remove highlight for all other listings)
-            var activeItem = document.getElementsByClassName('active');
+    //         // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+    //         var activeItem = document.getElementsByClassName('active');
 
-            e.stopPropagation();
-            if (activeItem[0]) {
-                activeItem[0].classList.remove('active');
-            }
+    //         e.stopPropagation();
+    //         if (activeItem[0]) {
+    //             activeItem[0].classList.remove('active');
+    //         }
 
-            var listing = document.getElementById('listing-' + i);
-            listing.classList.add('active');
+    //         var listing = document.getElementById('listing-' + i);
+    //         listing.classList.add('active');
 
-        });
-    });
+    //     });
+    // });
 
     function flyToStore(currentFeature) {
         map.flyTo({
