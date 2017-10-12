@@ -1,7 +1,3 @@
-
-
-update();
-
 function update(){
     $.ajax({
             type : 'POST',
@@ -9,9 +5,15 @@ function update(){
             dataType : 'json',
             url: '/ajax',
             success : function(response) {
-                var content = response["data"];
-                console.log(content);
-                loadingMap(content);
+                var content = response["data"],
+                    parameters = {
+                        id: 'map',
+                        layers: ['clusters','fish']
+                    };
+
+                renderMapView(content, parameters);
             }
     });
 }
+
+update();

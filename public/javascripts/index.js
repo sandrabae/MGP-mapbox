@@ -1,117 +1,116 @@
-loadingMap = function(data) {
-    if (!('remove' in Element.prototype)) {
-        Element.prototype.remove = function() {
-            if (this.parentNode) {
-                this.parentNode.removeChild(this);
-            }
-        };
+
+renderMapView = function(data, parameters) {
+
+    /* Variables */
+    var map;
+
+    function initializeMap(){
+        if (!('remove' in Element.prototype)) {
+            Element.prototype.remove = function() {
+                if (this.parentNode) {
+                    this.parentNode.removeChild(this);
+                }
+            };
+        }
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2lqbmpqazdlMDBsdnRva284cWd3bm11byJ9.V6Hg2oYJwMAxeoR9GEzkAA';
+
+        // This adds the map
+        map = new mapboxgl.Map({
+            // container id specified in the HTML
+            container: parameters['id'],
+            // style URL
+            style: 'mapbox://styles/mapbox/light-v9',
+            // initial position in [long, lat] format
+            center: [-103.913, 18.527],
+            // initial zoom
+            zoom: 5,
+            scrollZoom: true
+        });
+    }
+    
+    function populateMap(){
+        // This adds the data to the map
+        map.on('load', function(e) {
+
+            //Add Polygonal Sources
+            //TODO: add a check to enusre it is a polygon geoJSON not points
+            var color =  d3.scaleOrdinal(d3['schemeCategory20b']);
+            data.forEach(function(layer, i){
+                var layerID = 'places' + parameters['layers'][i];
+
+                map.addSource(parameters['layers'][i], {
+                    "type": "geojson",
+                    "data": layer
+                });
+
+                map.addLayer({
+                    "id": layerID,
+                    "type": "fill",
+                    "source": parameters['layers'][i],
+                    "paint": {
+                        "fill-color": color(i),
+                        "fill-opacity": 0.4
+                    },
+                    "filter": ["==", "$type", "Polygon"]
+                });
+
+                // Change the cursor to a pointer when the mouse is over the states layer.
+                map.on('mouseenter', 'places-boundary', function () {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.on('click', 'places-boundary', function (e) {
+                    //Catch the data for this polygon and forward it to the stream-map 
+                    new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML(e.features[0].properties.name)
+                        .addTo(map);
+                });
+            });
+            
+        });
     }
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2lqbmpqazdlMDBsdnRva284cWd3bm11byJ9.V6Hg2oYJwMAxeoR9GEzkAA';
 
-    // This adds the map
-    var map = new mapboxgl.Map({
-        // container id specified in the HTML
-        container: 'map',
-        // style URL
-        style: 'mapbox://styles/mapbox/light-v9',
-        // initial position in [long, lat] format
-        center: [-103.913, 18.527],
-        // initial zoom
-        zoom: 5,
-        scrollZoom: true
-    });
-
-	console.log(data[0]);
-    console.log(data[1]);
-    //Two kinds of sources, polygonal & markers
-
-    // This adds the data to the map
-    map.on('load', function(e) {
-        // This is where your '.addLayer()' used to be, instead add only the source without styling a layer
-        map.addSource("places", {
-            "type": "geojson",
-            "data": data[0]
-        });
-
-        map.addLayer({
-            "id": "places-boundary",
-            "type": "fill",
-            "source": "places",
-            "paint": {
-                "fill-color": "#888888",
-                "fill-opacity": 0.4
-            },
-            "filter": ["==", "$type", "Polygon"]
-        });
-
-        map.addSource("fish", {
-            "type": "geojson",
-            "data": data[1]
-        });
-
-        map.addLayer({
-            "id": "fish-boundary",
-            "type": "fill",
-            "source": "fish",
-            "paint": {
-                "fill-color": "#dd7474",
-                "fill-opacity": 0.4
-            },
-            "filter": ["==", "$type", "Polygon"]
-        });  
-
-        // Change the cursor to a pointer when the mouse is over the states layer.
-        map.on('mouseenter', 'places-boundary', function () {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        map.on('click', 'places-boundary', function (e) {
-            //Catch the data for this polygon and forward it to the stream-map 
-            new mapboxgl.Popup()
-                .setLngLat(e.lngLat)
-                .setHTML(e.features[0].properties.name)
+    //Used to render points rather than polygon
+    function showMarkers(index){
+        // This is where your interactions with the symbol layer used to be
+        // Now you have interactions with DOM markers instead
+        data[index].features.features.forEach(function(marker, i) {
+            // Create an img element for the marker
+            var el = document.createElement('div');
+            el.id = "marker-" + i;
+            el.className = 'marker';
+            // Add markers to the map at all points
+            new mapboxgl.Marker(el, {
+                    offset: [-28, -46]
+                })
+                .setLngLat(marker.geometry.coordinates)
                 .addTo(map);
-        });
-        // Initialize the list
-        // buildLocationList(stores);
 
-    });
+            el.addEventListener('click', function(e) {
+                // 1. Fly to the point
+                flyToStore(marker);
 
-    // This is where your interactions with the symbol layer used to be
-    // Now you have interactions with DOM markers instead
-    // data[1].features.features.forEach(function(marker, i) {
-    //     // Create an img element for the marker
-    //     var el = document.createElement('div');
-    //     el.id = "marker-" + i;
-    //     el.className = 'marker';
-    //     // Add markers to the map at all points
-    //     new mapboxgl.Marker(el, {
-    //             offset: [-28, -46]
-    //         })
-    //         .setLngLat(marker.geometry.coordinates)
-    //         .addTo(map);
+                // 2. Close all other popups and display popup for clicked store
+                createPopUp(marker);
 
-    //     el.addEventListener('click', function(e) {
-    //         // 1. Fly to the point
-    //         flyToStore(marker);
+                // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+                var activeItem = document.getElementsByClassName('active');
 
-    //         // 2. Close all other popups and display popup for clicked store
-    //         createPopUp(marker);
+                e.stopPropagation();
+                if (activeItem[0]) {
+                    activeItem[0].classList.remove('active');
+                }
 
-    //         // 3. Highlight listing in sidebar (and remove highlight for all other listings)
-    //         var activeItem = document.getElementsByClassName('active');
+                var listing = document.getElementById('listing-' + i);
+                listing.classList.add('active');
 
-    //         e.stopPropagation();
-    //         if (activeItem[0]) {
-    //             activeItem[0].classList.remove('active');
-    //         }
-
-    //         var listing = document.getElementById('listing-' + i);
-    //         listing.classList.add('active');
-
-    //     });
-    // });
+            });
+        }); 
+    }
+    
 
     function flyToStore(currentFeature) {
         map.flyTo({
@@ -134,54 +133,8 @@ loadingMap = function(data) {
             .addTo(map);
     }
 
+    initializeMap(); 
+    populateMap(); 
+    //TODO: update map w/ new data as need be
 
-    // function buildLocationList(data) {
-    //     for (i = 0; i < data.features.length; i++) {
-    //         var currentFeature = data.features[i];
-    //         var prop = currentFeature.properties;
-
-	
-    //         var listings = document.getElementById('listings');
-    //         var listing = listings.appendChild(document.createElement('div'));
-    //         listing.className = 'item';
-    //         listing.id = "listing-" + i;
-
-    //         var link = listing.appendChild(document.createElement('a'));
-
-    //         link.href = '#';
-    //         link.className = 'title';
-    //         link.dataPosition = i;
-    //         link.innerHTML = currentFeature.geometry.coordinates.toString();
-
-    //         var details = listing.appendChild(document.createElement('div'));
-    //         var date =  prop.Date[0];
-    //         details.innerHTML = "# of Samples: " + prop.Samples;
-    //         if (prop.Date) {
-    //             details.innerHTML += ' </br> Date: ' + date;
-    //         }
-
-
-
-    //         link.addEventListener('click', function(e) {
-    //             // Update the currentFeature to the store associated with the clicked link
-    //             var clickedListing = data.features[this.dataPosition];
-
-    //             // 1. Fly to the point
-    //             flyToStore(clickedListing);
-
-    //             // 2. Close all other popups and display popup for clicked store
-    //             createPopUp(clickedListing);
-
-    //             // 3. Highlight listing in sidebar (and remove highlight for all other listings)
-    //             var activeItem = document.getElementsByClassName('active');
-
-    //             if (activeItem[0]) {
-    //                 activeItem[0].classList.remove('active');
-    //             }
-    //             this.parentNode.classList.add('active');
-
-    //         });
-    //     }
-    // }
-
-}
+};
