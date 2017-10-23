@@ -14,6 +14,13 @@ module.exports = {
 		});
 
 		return data;
+	},
+
+	retrieveDataFromFile: function(filename){
+		var path ='./data/' + filename,
+			content = require(path);
+
+		return content;
 	}
 }
 

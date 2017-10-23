@@ -1,4 +1,3 @@
-
 renderMapView = function(data, parameters) {
 
     /* Variables */

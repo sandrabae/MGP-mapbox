@@ -5,7 +5,7 @@ var dataRetrieval = require('../server/data-retrieval');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index');
+  res.render('main-view');
 });
 
 /* POST 
@@ -32,8 +32,9 @@ router.post('/ajax', function(req, res) {
         geoCollection.push(geoJSON);
     });
 
+    var streamData = dataRetrieval.retrieveDataFromFile('full-occ'); //<-- this line is just for testing the stream graph
     if(req.xhr || req.accepts('json,html')==='json'){
-        res.json({success: true , data :geoCollection });
+        res.json({success: true , data :streamData });
     } else {
         res.redirect(303, '/ajax');
     }

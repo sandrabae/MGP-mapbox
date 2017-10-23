@@ -1,75 +1,85 @@
-var n = 20, // number of layers
-    m = 200, // number of samples per layer
-    stack = d3.stack().keys(d3.range(n).map(function (d) { return "layer"+d; })).offset(d3.stackOffsetWiggle);
+/*
+ * Input: Array< Object >: array where each object represents the amount of each microbe collected for that date
+*/
 
-// Create empty data structures
-var matrix0 = d3.range(m).map(function (d) { return { x:d }; });
-var matrix1 = d3.range(m).map(function (d) { return { x:d }; });
+function renderComparisons(data){
 
-// Fill them with random data
-d3.range(n).map(function(d) { bumpLayer(m, matrix0, d); });
-d3.range(n).map(function(d) { bumpLayer(m, matrix1, d); });
+  var parseTime = d3.timeParse("%Y");
+  data.forEach(function(d,i){ d['year'] = parseTime(d['year']);}); // Convert year to a date object
 
-var layers0 = stack(matrix0),
-    layers1 = stack(matrix1);
+  //Sort by chronological order
+  data.sort(function(a,b){
+    return new Date(b.year) - new Date(a.year);
+  });
 
-var width = 900,
-    height = 500;
+  var keys = Object.keys(data[0]);
+  keys = removeValueFromArray(keys,'year');
 
-var x = d3.scaleLinear()
-    .domain([0, m - 1])
-    .range([0, width]);
+  var stack = d3.stack()
+    .keys(keys)
+    .order(d3.reverse)
+    .offset(d3.silhouette),
+  series = stack(data);
 
-var y = d3.scaleLinear()
-    .domain([d3.min(layers0.concat(layers1), function(layer) { return d3.min(layer, function(d) { return d[0]; }); }), d3.max(layers0.concat(layers1), function(layer) { return d3.max(layer, function(d) { return d[1]; }); })])
+  var margin = {top: 20, right: 20, bottom: 50, left: 70},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+  // Coloring
+  var color = d3.scaleLinear()
+    .range(["#51D0D7", "#31B5BB"]);
+
+  // Setup axis
+
+  var x =  d3.scaleTime().domain(d3.extent(data, function(d){ return d.year; })).range([0, width]);//d3.scaleLinear().domain(d3.extent(data, function(d){ console.log(d.year); return d.year; })).range([0, width]);
+  var xAxis = d3.axisBottom(x);
+
+  var min = d3.min(series, function(layer) { return d3.min(layer, function(d) { return d[0]; }); });
+  var max = d3.max(series, function(layer) { return d3.max(layer, function(d) { return d[1]; }); });
+
+  console.log(series);
+
+  var y = d3.scaleLinear()
+    .domain([ min , max ])
     .range([height, 0]);
 
-var color = d3.scaleLinear()
-    .range(["#aad", "#556"]);
 
-var area = d3.area()
-    .x(function(d,i) { return x(d.data.x); })
+  var area = d3.area()
+    .x(function(d) { return x(d.data.year); })
     .y0(function(d) { return y(d[0]); })
-    .y1(function(d) { return y(d[1]); });
+    .y1(function(d) { return y(d[1]); })
+    .curve(d3.curveBasis);
 
-var svg = d3.select("#chart").append("svg")
-    .attr("width", width)
-    .attr("height", height);
+  var svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
-svg.selectAll("path")
-    .data(layers0)
-  .enter().append("path")
-    .attr("d", area)
+  svg.selectAll("path")
+    .data(series)
+    .enter().append("path")
+    .attr("d", function(d){ return area(d); })
     .style("fill", function() { return color(Math.random()); });
 
-function transition() {
-  d3.selectAll("path")
-      .data(function() {
-        var d = layers1;
-        layers1 = layers0;
-        return layers0 = d;
-      })
-    .transition()
-      .duration(2500)
-      .attr("d", area);
-}
+  svg.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + (height) + ")")
+    .call(xAxis); 
 
-// Inspired by Lee Byron's test data generator.
-function bumpLayer(n, matrix, layer) {
-
-  function bump(a) {
-    var x = 1 / (.1 + Math.random()),
-        y = 2 * Math.random() - .5,
-        z = 10 / (.1 + Math.random());
-    for (var i = 0; i < n; i++) {
-      var w = (i / n - y) * z;
-      a[i] += x * Math.exp(-w * w);
-    }
+  function update(data){
+    d3.selectAll("path")
+      .data(data)
+      .transition()
+        .duration(2500)
+        .attr("d", area);
   }
 
-  var a = [], i;
-  var i;
-  for (i = 0; i < n; ++i) a[i] = 0;
-  for (i = 0; i < 5; ++i) bump(a);
-  return a.forEach(function(d, i) { matrix[i]["layer"+layer]=Math.max(0, d)+1; });
-}
+  function removeValueFromArray(array,value){
+    var position = array.indexOf(value);
+    array.splice(position,1);
+    return array;
+  }
+};
+
+
