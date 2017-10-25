@@ -5,7 +5,7 @@ module.exports = {
 	*/
 	retrieveLocalData: function(){
 		var path = './data/',
-			filenames = ['Spatial','fish-cluster'],
+			filenames = ['jm-spatial-cluster','jm-fish-cluster'],
 			data = [];
 
 		filenames.forEach(function(file){

@@ -16,25 +16,27 @@ router.post('/ajax', function(req, res) {
      start = body["start"],
      end = body["end"];
 
-    var clusterToRender =  dataRetrieval.retrieveLocalData(),
-        clusters = [];
+    // var clusterToRender =  [dataRetrieval.retrieveLocalData()[0]],
+    //     clusters = [];
 
-    clusterToRender.forEach(function(cluster){
-        var polygon = compute.computeClustersPolygon(cluster);
-        clusters.push(polygon);
-    });
+    var layers = [dataRetrieval.retrieveLocalData()[0][0],dataRetrieval.retrieveLocalData()[1][0]]; // for python exported...
+    
+    // clusterToRender.forEach(function(cluster){
+    //     var polygon = compute.computeClustersPolygon(cluster);
+    //     clusters.push(polygon);
+    // });
 
-    // clusters.push(clusterToRender[1]); <-- if you want to show the markers for it
+    // // clusters.push(clusterToRender[1]); <-- if you want to show the markers for it
 
-    var geoCollection = [];
-    clusters.forEach(function(d){
-        var geoJSON = {"type": "FeatureCollection", "features": d}
-        geoCollection.push(geoJSON);
-    });
+    // var geoCollection = [];
+    // clusters.forEach(function(d){
+    //     var geoJSON = {"type": "FeatureCollection", "features": d}
+    //     geoCollection.push(geoJSON);
+    // });
 
     var streamData = dataRetrieval.retrieveDataFromFile('full-occ'); //<-- this line is just for testing the stream graph
     if(req.xhr || req.accepts('json,html')==='json'){
-        res.json({success: true , data :streamData });
+        res.json({success: true , data : layers});
     } else {
         res.redirect(303, '/ajax');
     }

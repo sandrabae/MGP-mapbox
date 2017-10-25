@@ -11,8 +11,9 @@ function update(){
                         layers: ['clusters','fish']
                     };
 
-                // renderMapView(content, parameters);
-                renderComparisons(content);
+                console.log(content);
+                renderMapView(content, parameters);
+                // renderComparisons(content);
             }
     });
 }

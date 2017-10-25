@@ -34,7 +34,7 @@ renderMapView = function(data, parameters) {
 
             //Add Polygonal Sources
             //TODO: add a check to enusre it is a polygon geoJSON not points
-            var color =  d3.scaleOrdinal(d3['schemeCategory20b']);
+            var color =  d3.scaleOrdinal(d3['schemeCategory10']);
             data.forEach(function(layer, i){
                 var layerID = 'places' + parameters['layers'][i];
 
