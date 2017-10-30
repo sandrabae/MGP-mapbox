@@ -27,7 +27,7 @@ body {
         .map {
           position:absolute;
           right:0;
-          width:47.5%;
+          width:100%;
           top:0;bottom:0;
         }
 
