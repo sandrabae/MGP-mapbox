@@ -27,7 +27,7 @@ class TimeRange(Resource):
     def post(self):
     	print(request.data)
     	# from request.data return data based on time
-    	return {'data': 'happy'} 
+    	return {'data': 'happy'}
 
 
 api.add_resource(TimeRange, '/TimeRange')
