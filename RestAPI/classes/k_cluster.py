@@ -18,10 +18,21 @@ class KCluster(Resource):
     # return the polygon(s) to draw in geojson format
     def post(self):
 
+
     	print(request.data)
     	body = json.loads(request.data) #convert it to json
     	year = body["K"] # get what you care about
 
     	#data = self.requestDB(year)
-    	# from request.data return data based on time
+    	#from request.data 
+
+        #query DB return data based on time & microbe (only return longitude and latitude)
+
+        #call rpy2 and cluster it (k-means)
+
+        #format as GEOJSON
+            #properties = microbe name , # samples, year
+
+        #return result
+
     	return {'data': "data"} #the database returns
