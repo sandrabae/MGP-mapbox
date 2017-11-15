@@ -26,6 +26,12 @@ renderMapView = function(data, parameters) {
             zoom: 5,
             scrollZoom: true
         });
+
+        map.on('zoomend', function (e) { 
+            console.log("zoomed");
+            //Called when zooming has ended / stopped
+            //TODO: call an update that based on zoom-level show the level of detail 
+        });
     }
     
     function populateMap(){
