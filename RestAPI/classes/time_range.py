@@ -6,8 +6,6 @@ from bson.json_util import dumps
 from jarvis_march import JarvisMarch
 from api import mongo
 
-
-import requests
 import json
 
 
@@ -26,10 +24,10 @@ class TimeRange(Resource):
     # post = F(x){ return x + 1}
     def post(self):
 
-    	print(request.data)
-    	body = json.loads(request.data) #convert it to json
-    	year = body["Year"] # get what you care about
+    	# print(request.data)
+    	# body = json.loads(request.data) #convert it to json
+    	# year = body["Year"] # get what you care about
 
-    	data = self.requestDB(year)
+    	# data = self.requestDB(year)
     	# from request.data return data based on time
-    	return {'data': data} #the database returns
+    	return {'data': 'data'} #the database returns

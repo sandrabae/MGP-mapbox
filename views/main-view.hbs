@@ -1,25 +1,31 @@
-<a href="#menu" class="menu-link">&#9776;</a>
-<nav id="menu" class="panel" role="navigation">
+ <div id="menu" class="panel" role="navigation">
     <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">The Ballad of El Goodo</a></li>
-        <li><a href="#">Thirteen</a></li>
-        <li><a href="#">September Gurls</a></li>
-        <li><a href="#">What's Going Ahn</a></li>
+      <li><a href="https://github.com/ascott1/bigSlide.js"><span class="icon-github nav-icon"></span>Github</a></li>
+      <li><a href="https://raw.github.com/ascott1/bigSlide.js/master/dist/bigSlide.min.js"><span class="icon-download nav-icon"></span>Compressed </a></li>
+      <li><a href="https://raw.github.com/ascott1/bigSlide.js/master/dist/bigSlide.js"><span class="icon-download nav-icon"></span>Uncompressed</a></li>
+      <li><a href="#how"><span class="icon-book nav-icon"></span>How to</a></li>
+      <li><a href="#options"><span class="icon-cog nav-icon"></span>Options</a></li>
     </ul>
-</nav>
+    </div>
 
-<div id='map' class='map'> </div>
+  
+    <div class="wrap push">
+      <a href="#menu" id="nav-toggle" class="menu-link">&#9776;</a>  
+    </div> <!-- /.wrap -->
 
+    <div class="wrap push">
+    <!-- <div id='map' class='map'> </div> -->
+    </div>
 
-{{!-- <div id='chart'> </div> --}}
+    {{!-- <div id='chart'> </div> --}}
 
-<script type="text/javascript" src="/javascripts/bigSlide.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.menu-link').bigSlide();
-    });
-</script>
+    <script type="text/javascript" src="/javascripts/bigSlide.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.menu-link').bigSlide();
+        });
+    </script>
 
-<script type="text/javascript" src="/javascripts/comparisons.js"></script>
-<script type="text/javascript" src="/javascripts/update.js"></script>
+    <script type="text/javascript" src="/javascripts/comparisons.js"></script>
+    <script type="text/javascript" src="/javascripts/update.js"></script>
+

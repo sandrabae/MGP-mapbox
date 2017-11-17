@@ -6,8 +6,6 @@ from bson.json_util import dumps
 from jarvis_march import JarvisMarch
 from api import mongo
 
-
-import requests
 import json
 
 
