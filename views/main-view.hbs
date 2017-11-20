@@ -1,21 +1,17 @@
- <div id="menu" class="panel" role="navigation">
-  <ul>
-    <li><div class="side-by-side clearfix">
-      <select id="microbes" data-placeholder="Your Favorite Types of Bear" multiple class="chosen-select" tabindex="8">
-        <option value=""></option>
-        <option>American Black Bear</option>
-        <option>Asiatic Black Bear</option>
-        <option>Brown Bear</option>
-        <option>Giant Panda</option>
-        <option selected>Sloth Bear</option>
-        <option disabled>Sun Bear</option>
-        <option selected>Polar Bear</option>
-        <option disabled>Spectacled Bear</option>
-      </select></div></li>
-      <li><a href="https://raw.github.com/ascott1/bigSlide.js/master/dist/bigSlide.min.js"><span class="icon-download nav-icon"></span>Compressed </a></li>
-      <li><a href="https://raw.github.com/ascott1/bigSlide.js/master/dist/bigSlide.js"><span class="icon-download nav-icon"></span>Uncompressed</a></li>
-      <li><a href="#how"><span class="icon-book nav-icon"></span>How to</a></li>
-      <li><a href="#options"><span class="icon-cog nav-icon"></span>Options</a></li>
+  <div id="menu" class="panel" role="navigation">
+    <ul>
+      <li>
+        <div class="side-by-side clearfix">
+          <select id="microbes" data-placeholder="Select a Microbe..." multiple class="chosen-select">
+            <option>CERATIUM TRIPOS ATLANTICUM</option>
+            <option>PROROCENTRUM GRACILE</option>
+            <option>PROTOPERIDINIUM TRUNCATUM</option>
+            <option>RHIZOSOLENIA HEBETATA SEMISPINA</option>
+          </select>
+        </div>
+      </li>
+      <li><a href="#clusters"><span class="icon-book nav-icon"></span>Clusters</a></li>
+      <li><a href="#submit"><span class="icon-cog nav-icon"></span>Submit</a></li>
     </ul>
   </div>
 
@@ -24,8 +20,8 @@
     <a href="#menu" id="nav-toggle" class="menu-link">&#9776;</a>  
   </div> <!-- /.wrap -->
 
-  <div class="wrap push">
-    <!-- <div id='map' class='map'> </div> -->
+  <div>
+    <div id='map' class='map'> </div>
   </div>
 
   {{!-- <div id='chart'> </div> --}}
@@ -34,7 +30,7 @@
   <script>
   $(document).ready(function() {
     $('.menu-link').bigSlide();
-    $("#microbes").chosen({width: "100%"});
+    $("#microbes").chosen({width: "100%", placeholder_text_multiple:"Select Biology" });
   });
   </script>
 
