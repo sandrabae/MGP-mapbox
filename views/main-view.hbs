@@ -1,7 +1,7 @@
  <div id="menu" class="panel" role="navigation">
   <ul>
     <li><div class="side-by-side clearfix">
-      <select data-placeholder="Your Favorite Types of Bear" multiple class="chosen-select" tabindex="8">
+      <select id="microbes" data-placeholder="Your Favorite Types of Bear" multiple class="chosen-select" tabindex="8">
         <option value=""></option>
         <option>American Black Bear</option>
         <option>Asiatic Black Bear</option>
@@ -34,12 +34,12 @@
   <script>
   $(document).ready(function() {
     $('.menu-link').bigSlide();
+    $("#microbes").chosen({width: "100%"});
   });
   </script>
 
   <script type="text/javascript" src="/javascripts/comparisons.js"></script>
   <script type="text/javascript" src="/javascripts/update.js"></script>
-  <script src="/javascripts/prism.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/javascripts/init.js" type="text/javascript" charset="utf-8"></script>
+
 
 
