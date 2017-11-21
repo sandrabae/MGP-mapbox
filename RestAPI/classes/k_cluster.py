@@ -7,9 +7,14 @@ from .jarvis_march import JarvisMarch
 from api import mongo
 
 import json
-# import rpy2
-# from rpy2.robjects.packages import importr
 
+import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr 
+rjson=importr('rjson')
+r = robjects.r
+
+def compute(play,points):
+    points.frame(r.matrix(r.unlist(play), ncol=3, byrow=T))
 
 
 class KCluster(Resource):
@@ -17,6 +22,7 @@ class KCluster(Resource):
     # Input {'K': #, microbe: 'name', timerange: 'date-date' }
     # group microbes for the given time period in to k groups
     # return the polygon(s) to draw in geojson format
+
     def post(self):
         
 
@@ -33,15 +39,55 @@ class KCluster(Resource):
         points = self.requestDB(time, microbe) #works
 
         #call rpy2 and cluster it (k-means)
+        robjects.r('''   
+            cluster <- function(k, data, verbose=FALSE){
+                cat("I am calling f().\n")
+                bio.JSON <- fromJSON(data)
+                df <- lapply(bio.JSON, function(play) # Loop through each "play"
+                {
+                  # Convert each group to a data frame.
+                  # This assumes you have 3 elements each time (id, long, lat)
+                  data.frame(matrix(unlist(play), ncol=3, byrow=T))
+                })
 
+                # one single dataframe
+                df <- do.call(rbind, df)
+
+                # Make column names nicer, remove row names
+                colnames(df) <- names(bio.JSON[[1]])
+                rownames(df) <- NULL
+
+                set.seed(7)
+                #determine which columns I care about (long & lat)
+                kgroups = kmeans(df[,c(2,3)], k, nstart=100)
+
+                #For k groups:
+                    mylist <- list() 
+                    #create list of groups (json array) 
+                    for (i in 1:k){
+                       kcluster = df[kgroups$cluster==i,]
+                       x <- toJSON(unname(split(kcluster, 1:nrow(kcluster))))
+                       mylist <- append(mylist, x)
+                    }
+
+                #return that array
+                
+                mylist
+            }
+            ''')
+        r_cluster = robjects.globalenv['cluster']
+        points_clusters = r_cluster(k,points)
+
+        jarvisMarch = JarvisMarch()
         #Convert clusters to polygons
-
+        polygons = list()
+        for points_cluster in points_clusters:
+            parsed_cluster = json.loads(points_cluster[0])
+            polygons.append(jarvisMarch.getPolygon(parsed_cluster))
         #format as GEOJSON
-            #properties = microbe name , # samples, year
+        output = jarvisMarch.pointsToGEO(polygons)
 
-        #return result
-
-        return {'data': points} #the database returns
+        return {'data': output } #the database returns
 
     def requestDB(self,year,microbe):
         mongo.db.noaa.create_index( 'Year' )

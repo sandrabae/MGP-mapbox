@@ -1,9 +1,9 @@
-class JarvisMarch:
-    class Point:
-        def __init__(self, xCoord = 0, yCoord = 0):
-            self.x = xCoord
-            self.y = yCoord
+class Point:
+    def __init__(self, xCoord = 0, yCoord = 0):
+        self.x = xCoord
+        self.y = yCoord
 
+class JarvisMarch:
     def jarvisMarch(self, points, n):
         if n < 3: return
         hull = []
@@ -45,9 +45,28 @@ class JarvisMarch:
     def getPolygon(self,polyCluster):
         points = []
         for obj in polyCluster:
-            points.append(Point(float(obj['Longitude']), float(obj['Latitude'])))
+            point = Point(float(obj['Longitude']), float(obj['Latitude']))
+            points.append(point)
         hull = self.jarvisMarch(points, len(points))
         return hull
+
+    def createPolyGEOJSON(self,data):
+        geojson = {}
+        geojson["type"] = "FeatureCollection"
+        features = []
+        for node in data:
+            geoObj = {}
+            geometry = {}
+            coordinates = [node]
+            geometry["type"] = "Polygon"
+            geometry["coordinates"] = coordinates
+
+            geoObj["geometry"] = geometry
+
+            features.append(geoObj)
+
+        geojson["features"] = features
+        return geojson
 
     def pointsToGEO(self,polyPoints):
         output = []
@@ -62,5 +81,7 @@ class JarvisMarch:
 
             poly.append(temp)
 
-        #output.append(pointsToGEOJSON(poly))
+        output.append(self.createPolyGEOJSON(poly))
         return output
+
+
